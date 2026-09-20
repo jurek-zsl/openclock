@@ -17,6 +17,17 @@ if %ERRORLEVEL% NEQ 0 (
 )
 
 echo [✓] Node.js runtime detected.
+
+if not exist "node_modules\" (
+  echo [i] First-time setup: Installing dependencies via npm...
+  call npm install
+  if %ERRORLEVEL% NEQ 0 (
+    echo [ERROR] Failed to install npm dependencies!
+    pause
+    exit /b 1
+  )
+)
+
 echo [✓] Launching browser to http://localhost:3000 ...
 echo [✓] Classmates can connect using your local Wi-Fi IP on port 3000!
 echo.

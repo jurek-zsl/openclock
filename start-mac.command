@@ -2,7 +2,7 @@
 cd "$(dirname "$0")"
 
 # Configure PATH for Node
-export PATH="/usr/local/bin:/opt/homebrew/bin:$HOME/.nvm/versions/node/$(ls $HOME/.nvm/versions/node 2>/dev/null | tail -n 1)/bin:$PATH"
+export PATH="$HOME/.openclock-node/bin:$HOME/.local/bin:/usr/local/bin:/opt/homebrew/bin:$HOME/.nvm/versions/node/$(ls $HOME/.nvm/versions/node 2>/dev/null | tail -n 1)/bin:$PATH"
 
 clear
 echo -e "\033[1;36m"
@@ -38,6 +38,13 @@ fi
 LOCAL_IP=$(ipconfig getifaddr en0 2>/dev/null || ipconfig getifaddr en1 2>/dev/null || echo "127.0.0.1")
 
 echo -e "\033[1;32m[✓] Node.js Runtime detected:\033[0m $("$NODE_BIN" -v)"
+
+# Auto-install dependencies on first run
+if [ ! -d "node_modules" ]; then
+  echo -e "\033[1;33m[i] First-time setup: Installing dependencies via npm...\033[0m"
+  npm install
+fi
+
 echo -e "\033[1;35m[👑 HOST URL]:\033[0m      http://localhost:3000"
 echo -e "\033[1;36m[🌐 SCHOOL LAN]:\033[0m    http://${LOCAL_IP}:3000"
 echo ""

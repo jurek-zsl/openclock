@@ -47,31 +47,38 @@
 
 ## 🚀 Quick Start
 
-### Requirements (Host Only)
+### ⚡ One-Liner Automated Installers
+Run the one-liner in your terminal or PowerShell. It automatically clones the repository, configures Node.js & npm (if needed), installs all dependencies, and creates a Desktop shortcut with custom game branding:
 
-- **[Node.js](https://nodejs.org) v18+** — the only install needed
-
-### Windows
-
-```
-Double-click Overclock.bat
-```
-
-### macOS
-
+#### 🍎 macOS (Terminal)
 ```bash
-chmod +x start-mac.command   # one-time only
-double-click start-mac.command
+curl -fsSL https://raw.githubusercontent.com/jurek-zsl/openclock/main/install.sh | bash
 ```
 
-### CLI (any platform)
+#### 🪟 Windows (PowerShell)
+```powershell
+irm https://raw.githubusercontent.com/jurek-zsl/openclock/main/install.ps1 | iex
+```
+> **Tip for Windows CMD**: You can also run:  
+> `powershell -ExecutionPolicy Bypass -NoProfile -Command "irm https://raw.githubusercontent.com/jurek-zsl/openclock/main/install.ps1 | iex"`
 
+---
+
+### 🕹️ Manual Launch / Existing Clones
+
+#### Windows
+Double-click `Overclock.bat` (automatically installs npm dependencies if missing and launches game).
+
+#### macOS
+Double-click `start-mac.command` (run `chmod +x start-mac.command` once if needed).
+
+#### CLI (Any platform)
 ```bash
-npm install       # first time only
+npm install
 npm start
 ```
 
-The server starts on **`http://localhost:3000`** and auto-opens your browser. The terminal shows your LAN IP and a QR code for phone players.
+The server starts on **`http://localhost:3000`** and auto-opens your browser with the custom neon favicon. The terminal shows your LAN IP and a QR code for phone players.
 
 ---
 
