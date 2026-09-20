@@ -2,6 +2,9 @@
  * Cross-platform Input Controller with Super Ability and Expanded Weapons
  */
 
+const TOUCH_AIM_DEADZONE = 18;
+const TOUCH_AIM_RESPONSE = 0.22;
+
 export class InputController {
   constructor(canvas, onWeaponChange, onDash, onEmojiToggle, onSuperActivate, onParry) {
     this.canvas = canvas;
@@ -33,7 +36,7 @@ export class InputController {
     this.arrowShooting = false;
 
     this.joyMove = { x: 0, y: 0, active: false, touchId: null };
-    this.joyAim = { x: 0, y: 0, active: false, touchId: null };
+    this.joyAim = { x: 0, y: 0, active: false, touchId: null, targetAngle: 0 };
 
     this.setupKeyboard();
     this.setupMouse();
@@ -349,9 +352,14 @@ export class InputController {
 
       if (aimThumb) aimThumb.style.transform = `translate(${thumbX}px, ${thumbY}px)`;
 
-      this.aimAngle = angle;
+      if (dist > TOUCH_AIM_DEADZONE) {
+        if (!this.joyAim.active) {
+          this.aimAngle = angle;
+        }
+        this.joyAim.targetAngle = angle;
+      }
       this.joyAim.active = true;
-      this.isShooting = dist > 12;
+      this.isShooting = dist > TOUCH_AIM_DEADZONE;
     };
 
     joyMoveEl.addEventListener('touchstart', (e) => {
@@ -399,6 +407,13 @@ export class InputController {
   }
 
   getPayload() {
+    if (this.joyAim.active) {
+      let angleDelta = this.joyAim.targetAngle - this.aimAngle;
+      while (angleDelta < -Math.PI) angleDelta += Math.PI * 2;
+      while (angleDelta > Math.PI) angleDelta -= Math.PI * 2;
+      this.aimAngle += angleDelta * TOUCH_AIM_RESPONSE;
+    }
+
     const shooting = this.isShooting || this.mouse.down || this.keyFire || this.arrowShooting;
 
     return {

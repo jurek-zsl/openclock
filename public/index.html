@@ -3,13 +3,20 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#040711">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Openclock">
   <title>OPENCLOCK // High-Octane Cyberpunk Arena</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="alternate icon" type="image/png" href="favicon.png">
   <link rel="shortcut icon" href="favicon.ico">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/mobile.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -18,6 +25,14 @@
 </head>
 
 <body>
+  <div id="orientation-gate" class="orientation-gate" role="dialog" aria-modal="true" aria-labelledby="orientation-title" aria-describedby="orientation-copy" hidden>
+    <div class="orientation-gate__panel">
+      <div class="orientation-gate__eyebrow">OPTIMAL COMBAT VIEW</div>
+      <h1 id="orientation-title" class="orientation-gate__title">ROTATE TO LANDSCAPE</h1>
+      <p id="orientation-copy" class="orientation-gate__copy">Openclock is tuned for horizontal play with room for both thumb controls.</p>
+      <button id="btn-rotate-landscape" class="orientation-gate__button" type="button">ENTER LANDSCAPE MODE</button>
+    </div>
+  </div>
   <div id="game-container">
     <canvas id="game-canvas"></canvas>
     <div id="crt-overlay"></div>
@@ -381,7 +396,7 @@
         <div class="modal-card host-admin-card">
           <div class="host-modal-header">
             <div class="host-modal-title">👑 HOST MATCH OPERATIONS</div>
-            <button id="btn-close-host" class="close-x">&times;</button>
+            <button id="btn-close-host" class="close-x" aria-label="Close host controls">&times;</button>
           </div>
 
           <div class="host-admin-body">
@@ -519,7 +534,7 @@
         <div class="modal-card host-admin-card controls-card">
           <div class="host-modal-header">
             <div class="host-modal-title">⌨️ LAPTOP & TOUCHPAD CONTROLS</div>
-            <button id="btn-close-controls" class="close-x">&times;</button>
+            <button id="btn-close-controls" class="close-x" aria-label="Close controls">&times;</button>
           </div>
 
           <div class="controls-guide-body">
@@ -570,7 +585,7 @@
         <div class="modal-card host-admin-card settings-card">
           <div class="host-modal-header">
             <div class="host-modal-title">⚙️ SYSTEM CONFIG & CONTROLS</div>
-            <button id="btn-close-settings" class="close-x">&times;</button>
+            <button id="btn-close-settings" class="close-x" aria-label="Close settings">&times;</button>
           </div>
 
           <div class="settings-modal-body">
@@ -652,7 +667,7 @@
               <div class="guide-title">📖 OVERCLOCK // TACTICAL FIELD GUIDE</div>
               <div class="guide-subtitle">PILOT PROTOCOLS • COMBAT ARCHIVES • SYSTEM INTEL</div>
             </div>
-            <button id="btn-close-guide" class="close-x">&times;</button>
+            <button id="btn-close-guide" class="close-x" aria-label="Close field guide">&times;</button>
           </div>
 
           <!-- Tab Bar -->
@@ -1102,6 +1117,7 @@
           <div class="status-item">SERVER: <b id="status-ip">172.31.11.189:3000</b></div>
           <div class="status-item">ENCRYPTION: <b>QUANTUM-256</b></div>
           <div class="lobby-quick-actions">
+            <button id="btn-install-pwa" class="lobby-util-btn hidden" type="button">INSTALL APP</button>
             <button id="btn-lobby-settings" class="lobby-util-btn" title="Settings: Keys, Synth, SFX, CRT"><svg
                 class="cyber-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <circle cx="12" cy="12" r="3" />
@@ -1124,9 +1140,15 @@
           <div class="subtitle">TACTICAL MULTIPLAYER LAN ARENA // V3.0</div>
         </div>
 
+        <div class="mobile-lobby-tabs" role="tablist" aria-label="Lobby sections">
+          <button class="mobile-lobby-tab" type="button" role="tab" aria-selected="true" data-mobile-lobby-target="lobby-hangar">01 HANGAR</button>
+          <button class="mobile-lobby-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-mobile-lobby-target="lobby-loadout">02 LOADOUT</button>
+          <button class="mobile-lobby-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-mobile-lobby-target="lobby-arenas">03 CONTROL</button>
+        </div>
+
         <div class="lobby-columns">
           <!-- Column 1: Hangar & Mech Blueprint -->
-          <div class="lobby-section hangar-section">
+          <div id="lobby-hangar" class="lobby-section hangar-section">
             <div class="section-title-tag">01 // MECH HANGAR</div>
 
             <div class="hangar-viewport">
@@ -1310,13 +1332,13 @@
           </div>
 
           <!-- Column 2: Pilot Loadout & Weapons -->
-          <div class="lobby-section loadout-section">
+          <div id="lobby-loadout" class="lobby-section loadout-section">
             <div class="section-title-tag">02 // PILOT LOADOUT</div>
 
             <div class="input-group">
               <label class="section-heading" for="input-nickname">PILOT CALLSIGN</label>
-              <input type="text" id="input-nickname" placeholder="Enter name..." maxlength="14" autofocus
-                autocomplete="off">
+              <input type="text" id="input-nickname" placeholder="Enter name..." maxlength="14"
+                autocomplete="nickname">
             </div>
 
             <div class="input-group">
@@ -1363,7 +1385,7 @@
           </div>
 
           <!-- Column 3: Mission Command & LAN QR -->
-          <div class="lobby-section command-section">
+          <div id="lobby-arenas" class="lobby-section command-section">
             <div class="section-title-tag">03 // MISSION COMMAND</div>
 
             <!-- HOST CONTROLS PANEL (Visible only to Host) -->
@@ -1482,6 +1504,7 @@
     </div>
   </div>
 
+  <script type="module" src="js/mobile.js"></script>
   <script type="module" src="js/main.js"></script>
 </body>
 

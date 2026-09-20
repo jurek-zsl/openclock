@@ -20,6 +20,7 @@ export class GameRenderer {
     this.camY = 1300;
     this.targetCamX = 1300;
     this.targetCamY = 1300;
+    this.cameraZoom = this.getCameraZoom();
     this.shake = 0;
 
     // Particles & FX
@@ -74,6 +75,12 @@ export class GameRenderer {
     this.height = window.innerHeight;
     this.canvas.width = this.width;
     this.canvas.height = this.height;
+    this.cameraZoom = this.getCameraZoom();
+  }
+
+  getCameraZoom() {
+    const isTouchDevice = window.matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0;
+    return isTouchDevice ? 0.78 : 1;
   }
 
   setMapConfig(mapConfig) {
@@ -164,7 +171,7 @@ export class GameRenderer {
   }
 
   addScreenShake(amount) {
-    this.shake = Math.min(this.shake + amount, 28);
+    this.shake = Math.min(this.shake + amount * 0.4, 10);
   }
 
   addExplosion(x, y, radius = 65, color = '#ff5500') {
@@ -479,7 +486,7 @@ export class GameRenderer {
     if (this.shake > 0.1) {
       shakeX = (Math.random() * 2 - 1) * this.shake;
       shakeY = (Math.random() * 2 - 1) * this.shake;
-      this.shake *= 0.88;
+      this.shake *= 0.82;
     }
 
     // 1. Clear background
@@ -487,9 +494,9 @@ export class GameRenderer {
     ctx.fillRect(0, 0, this.width, this.height);
 
     ctx.save();
-    const viewOffsetX = this.width / 2 - this.camX + shakeX;
-    const viewOffsetY = this.height / 2 - this.camY + shakeY;
-    ctx.translate(viewOffsetX, viewOffsetY);
+    ctx.translate(this.width / 2 + shakeX, this.height / 2 + shakeY);
+    ctx.scale(this.cameraZoom, this.cameraZoom);
+    ctx.translate(-this.camX, -this.camY);
 
     // 2. World Features
     this.drawGrid(ctx);
@@ -1667,10 +1674,8 @@ export class GameRenderer {
 
     let rx, ry;
     if (inputHud.mouse && inputHud.mouse.x !== undefined) {
-      const viewOffsetX = Math.round(this.width / 2 - this.camX);
-      const viewOffsetY = Math.round(this.height / 2 - this.camY);
-      rx = inputHud.mouse.x - viewOffsetX;
-      ry = inputHud.mouse.y - viewOffsetY;
+      rx = this.camX + (inputHud.mouse.x - this.width / 2) / this.cameraZoom;
+      ry = this.camY + (inputHud.mouse.y - this.height / 2) / this.cameraZoom;
     } else {
       rx = localPlayer.x + Math.cos(inputHud.aimAngle || 0) * 200;
       ry = localPlayer.y + Math.sin(inputHud.aimAngle || 0) * 200;
