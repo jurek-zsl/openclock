@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OVERCLOCK // Dedicated Broadcast Camera</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: #030610;
+      font-family: var(--font-body);
+      user-select: none;
+    }
+
+    #broadcast-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    #spectate-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* Cinematic Broadcast Overlay */
+    #broadcast-hud {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 20px 24px;
+      box-sizing: border-box;
+    }
+
+    .broadcast-top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      width: 100%;
+    }
+
+    .broadcast-channel-tag {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(5, 9, 24, 0.85);
+      border: 1px solid rgba(0, 247, 255, 0.35);
+      padding: 8px 14px;
+      border-radius: 8px;
+      backdrop-filter: blur(8px);
+      pointer-events: auto;
+    }
+
+    .live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 0, 85, 0.2);
+      border: 1px solid var(--pink);
+      color: var(--pink);
+      font-family: var(--font-display);
+      font-size: 10px;
+      font-weight: 900;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 1px;
+      animation: livePulse 1.4s infinite alternate;
+    }
+
+    @keyframes livePulse {
+      0% { box-shadow: 0 0 5px var(--pink); }
+      100% { box-shadow: 0 0 16px var(--pink); }
+    }
+
+    .broadcast-title {
+      font-family: var(--font-display);
+      font-size: 13px;
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: 1.5px;
+    }
+
+    .broadcast-match-info {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .match-tag {
+      font-family: var(--font-display);
+      font-size: 12px;
+      font-weight: 900;
+      color: var(--cyan);
+      background: rgba(0, 247, 255, 0.12);
+      border: 1px solid rgba(0, 247, 255, 0.35);
+      padding: 4px 14px;
+      border-radius: 6px;
+      letter-spacing: 1.5px;
+    }
+
+    /* Broadcast Leaderboard */
+    .broadcast-standings {
+      width: 240px;
+      background: rgba(5, 9, 24, 0.88);
+      border: 1px solid rgba(0, 247, 255, 0.35);
+      border-radius: 8px;
+      padding: 10px 14px;
+      backdrop-filter: blur(8px);
+    }
+
+    .standings-title {
+      font-family: var(--font-display);
+      font-size: 11px;
+      font-weight: 900;
+      color: var(--yellow);
+      letter-spacing: 1px;
+      border-bottom: 1px solid rgba(255, 230, 0, 0.25);
+      padding-bottom: 4px;
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .standings-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 0;
+      color: #fff;
+    }
+
+    .standings-row.leader {
+      color: var(--yellow);
+    }
+
+    /* Bottom Focus Camera Bar */
+    .broadcast-bottom-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      width: 100%;
+    }
+
+    .focus-pilot-card {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: rgba(5, 9, 24, 0.9);
+      border: 1.5px solid var(--cyan);
+      box-shadow: 0 0 25px rgba(0, 247, 255, 0.3);
+      padding: 10px 20px;
+      border-radius: 10px;
+      backdrop-filter: blur(10px);
+      pointer-events: auto;
+    }
+
+    .focus-camera-badge {
+      font-family: var(--font-display);
+      font-size: 9px;
+      font-weight: 900;
+      color: var(--yellow);
+      border-right: 1px solid rgba(255, 255, 255, 0.15);
+      padding-right: 12px;
+      letter-spacing: 1px;
+    }
+
+    .focus-pilot-details {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .focus-pilot-name {
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 900;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .focus-pilot-mech {
+      font-family: var(--font-display);
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--cyan);
+      background: rgba(0, 247, 255, 0.12);
+      padding: 2px 6px;
+      border-radius: 3px;
+    }
+
+    .focus-pilot-stats {
+      display: flex;
+      gap: 14px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-dim);
+    }
+
+    .focus-pilot-stats b {
+      color: #fff;
+    }
+
+    /* Broadcast Controls Dock */
+    .broadcast-controls {
+      display: flex;
+      gap: 6px;
+      background: rgba(5, 9, 24, 0.85);
+      border: 1px solid rgba(0, 247, 255, 0.3);
+      border-radius: 8px;
+      padding: 6px;
+      backdrop-filter: blur(8px);
+      pointer-events: auto;
+    }
+
+    .b-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(0, 247, 255, 0.3);
+      color: var(--cyan);
+      font-family: var(--font-display);
+      font-size: 10px;
+      font-weight: 800;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .b-btn:hover {
+      background: rgba(0, 247, 255, 0.25);
+      color: #fff;
+    }
+
+    .b-btn.active {
+      background: var(--cyan);
+      color: #040711;
+    }
+  </style>
+</head>
+<body>
+  <div id="broadcast-container">
+    <canvas id="spectate-canvas"></canvas>
+    <div id="crt-overlay"></div>
+
+    <div id="broadcast-hud">
+      <!-- Top Bar -->
+      <div class="broadcast-top-bar">
+        <div class="broadcast-channel-tag">
+          <div class="live-badge">● ON AIR</div>
+          <div class="broadcast-title">OVERCLOCK // ARENA OBSERVER</div>
+        </div>
+
+        <div class="broadcast-match-info">
+          <div id="spectate-match-tag" class="match-tag">FFA // CYBER MATRIX</div>
+          <div id="round-timer-display">⏱️ 03:00</div>
+        </div>
+
+        <div class="broadcast-standings">
+          <div class="standings-title">
+            <span>STANDINGS</span>
+            <span>KILLS</span>
+          </div>
+          <div id="spectate-standings-body">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Bar -->
+      <div class="broadcast-bottom-bar">
+        <!-- Killfeed -->
+        <div id="killfeed"></div>
+
+        <!-- Focused Pilot Card -->
+        <div class="focus-pilot-card">
+          <div class="focus-camera-badge">
+            DIRECTOR CAM<br><span id="camera-mode-label" style="color:var(--cyan)">[AUTO AI]</span>
+          </div>
+          <div class="focus-pilot-details">
+            <div class="focus-pilot-name">
+              <span id="focus-name">FOLLOWING LEADER</span>
+              <span id="focus-mech" class="focus-pilot-mech">SPECTRE</span>
+            </div>
+            <div class="focus-pilot-stats">
+              <span>HP: <b id="focus-hp">100/100</b></span>
+              <span>SHIELD: <b id="focus-shield">50/50</b></span>
+              <span>STREAK: <b id="focus-streak" style="color:var(--yellow)">0</b></span>
+              <span>WEAPON: <b id="focus-weapon">Pulse Cannon</b></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="broadcast-controls">
+          <button id="btn-auto-cam" class="b-btn active">AUTO DIRECTOR</button>
+          <button id="btn-next-target" class="b-btn">CYCLE [SPACE]</button>
+          <button id="btn-fullscreen" class="b-btn">FULLSCREEN</button>
+          <button id="btn-audio" class="b-btn">BGM: OFF</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/spectate.js"></script>
+</body>
+</html>

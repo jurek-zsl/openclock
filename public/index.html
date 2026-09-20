@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>OVERCLOCK // High-Octane Cyberpunk Arena</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="game-container">
+    <canvas id="game-canvas"></canvas>
+    <div id="crt-overlay"></div>
+
+    <!-- In-Game HUD Overlays -->
+    <div id="hud">
+      <!-- Player Status Bottom-Left (AAA Combat Rig) -->
+      <div id="player-card" class="hud-box">
+        <div class="hud-header">
+          <div class="name-badge">
+            <span id="hud-player-title" class="sub-title">«CADET»</span>
+            <span id="hud-player-name">PILOT</span>
+          </div>
+          <span id="hud-ping">PING: --ms</span>
+        </div>
+        
+        <!-- Segmented Health Bar -->
+        <div class="stat-bar-container">
+          <div class="stat-label">
+            <span class="label-with-icon"><svg class="cyber-icon hp-icon" viewBox="0 0 24 24"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg> HP</span>
+            <span id="hud-hp-num" class="stat-val">100 / 100</span>
+          </div>
+          <div class="bar-outer bar-segmented">
+            <div id="hud-hp-bar" class="bar-fill bar-hp" style="width: 100%;"></div>
+            <div class="bar-segments"></div>
+          </div>
+        </div>
+
+        <!-- Segmented Shield Bar -->
+        <div class="stat-bar-container">
+          <div class="stat-label">
+            <span class="label-with-icon"><svg class="cyber-icon shield-icon" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> SHIELD</span>
+            <span id="hud-shield-num" class="stat-val">50 / 50</span>
+          </div>
+          <div class="bar-outer bar-segmented">
+            <div id="hud-shield-bar" class="bar-fill bar-shield" style="width: 50%;"></div>
+            <div class="bar-segments"></div>
+          </div>
+        </div>
+
+        <!-- Dash Recovery Gauge -->
+        <div class="stat-bar-container">
+          <div class="stat-label">
+            <span class="label-with-icon"><svg class="cyber-icon dash-icon" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> DASH [SPACE / SHIFT]</span>
+            <span id="hud-dash-status" class="dash-status ready">READY</span>
+          </div>
+          <div class="bar-outer">
+            <div id="hud-dash-fill" class="bar-fill bar-dash ready" style="width: 100%;"></div>
+          </div>
+        </div>
+
+        <!-- Parry / Deflect Barrier Recovery Gauge -->
+        <div class="stat-bar-container">
+          <div class="stat-label">
+            <span class="label-with-icon" style="color: #ffe600;"><svg class="cyber-icon" viewBox="0 0 24 24" style="fill:none; stroke:#ffe600; stroke-width:2;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> PARRY [C / V]</span>
+            <span id="hud-parry-status" class="dash-status ready" style="color:#ffe600; border-color: rgba(255, 230, 0, 0.4);">READY</span>
+          </div>
+          <div class="bar-outer">
+            <div id="hud-parry-fill" class="bar-fill bar-dash ready" style="width: 100%; background: linear-gradient(90deg, #ffaa00, #ffe600); box-shadow: 0 0 10px rgba(255, 230, 0, 0.5);"></div>
+          </div>
+        </div>
+
+        <!-- Super Meter -->
+        <div class="stat-bar-container">
+          <div class="stat-label">
+            <span class="super-label"><svg class="cyber-icon super-icon" viewBox="0 0 24 24"><polygon points="12 2 15 8.5 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 9 8.5 12 2"/></svg> SUPER [Q / F / L]</span>
+            <span id="hud-super-num" class="stat-val super-val">0%</span>
+          </div>
+          <div class="bar-outer super-bar-outer">
+            <div id="hud-super-bar" class="bar-fill bar-super" style="width: 0%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tactical Bottom Weapon Dock (8 Arsenal Slots) -->
+      <div id="weapon-dock" class="hud-box">
+        <div class="weapon-slot active" data-weapon="blaster" data-slot="1" title="[1] Pulse Cannon">
+          <span class="slot-key">1</span>
+          <div class="slot-icon" id="slot-icon-blaster"></div>
+          <span class="slot-name">PULSE</span>
+        </div>
+        <div class="weapon-slot" data-weapon="scatter" data-slot="2" title="[2] Scattershot">
+          <span class="slot-key">2</span>
+          <div class="slot-icon" id="slot-icon-scatter"></div>
+          <span class="slot-name">SCATTER</span>
+        </div>
+        <div class="weapon-slot" data-weapon="railgun" data-slot="3" title="[3] Neon Railgun">
+          <span class="slot-key">3</span>
+          <div class="slot-icon" id="slot-icon-railgun"></div>
+          <span class="slot-name">RAILGUN</span>
+        </div>
+        <div class="weapon-slot" data-weapon="bouncing" data-slot="4" title="[4] Plasma Ricochet">
+          <span class="slot-key">4</span>
+          <div class="slot-icon" id="slot-icon-bouncing"></div>
+          <span class="slot-name">BOUNCE</span>
+        </div>
+        <div class="weapon-slot" data-weapon="rocket" data-slot="5" title="[5] Micro-Missile">
+          <span class="slot-key">5</span>
+          <div class="slot-icon" id="slot-icon-rocket"></div>
+          <span class="slot-name">ROCKET</span>
+        </div>
+        <div class="weapon-slot" data-weapon="cryo" data-slot="6" title="[6] Cryo Freeze Ray">
+          <span class="slot-key">6</span>
+          <div class="slot-icon" id="slot-icon-cryo"></div>
+          <span class="slot-name">CRYO</span>
+        </div>
+        <div class="weapon-slot" data-weapon="flame" data-slot="7" title="[7] Flamethrower">
+          <span class="slot-key">7</span>
+          <div class="slot-icon" id="slot-icon-flame"></div>
+          <span class="slot-name">FLAME</span>
+        </div>
+        <div class="weapon-slot" data-weapon="seeker" data-slot="8" title="[8] Seeker Swarm">
+          <span class="slot-key">8</span>
+          <div class="slot-icon" id="slot-icon-seeker"></div>
+          <span class="slot-name">SEEKER</span>
+        </div>
+      </div>
+
+      <!-- Spectator Overlay Bar (Active when dead) -->
+      <div id="spectator-bar" class="hud-box hidden">
+        <button id="btn-spec-prev" class="spec-btn" title="Previous Target [A / ←]">&lt; PREV</button>
+        <div class="spec-target-info">
+          <span class="spec-label"><svg class="cyber-icon" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg> SPECTATING PILOT</span>
+          <span id="spec-target-name" class="spec-name">CONNECTING...</span>
+        </div>
+        <button id="btn-spec-next" class="spec-btn" title="Next Target [D / →]">NEXT &gt;</button>
+      </div>
+
+      <!-- Top Center Announcement & Mode Info -->
+      <div id="top-center-hud">
+        <div id="mode-display" class="hud-box">
+          <span id="hud-map-name">SECTOR 01: THE CORE</span>
+          <span class="separator">//</span>
+          <span id="hud-mode-name">FREE FOR ALL (FFA)</span>
+        </div>
+        <div id="round-timer-display" class="hud-box">⏱️ 03:00</div>
+
+        <!-- Team Scores (Visible in Team DM Mode) -->
+        <div id="team-scores" class="hud-box hidden">
+          <span class="team-score red"><span class="team-dot red"></span>RED: <b id="score-red">0</b></span>
+          <span class="vs">VS</span>
+          <span class="team-score blue"><span class="team-dot blue"></span>BLUE: <b id="score-blue">0</b></span>
+        </div>
+
+        <!-- PvE Goliath Boss HUD (Visible in Boss Raid) -->
+        <div id="boss-hud" class="hud-box hidden">
+          <div class="boss-header">
+            <div class="boss-title-wrap">
+              <svg class="cyber-icon boss-head-icon" viewBox="0 0 24 24"><path d="M4 4h16l-2 10-6 6-6-6L4 4z"/><circle cx="9" cy="9" r="1.5"/><circle cx="15" cy="9" r="1.5"/><line x1="8" y1="14" x2="16" y2="14" stroke-width="2"/></svg>
+              <span id="boss-name">GOLIATH CORE // COLOSSAL AUTOMATON</span>
+            </div>
+            <span id="boss-phase-badge" class="boss-phase">PHASE 1: DORMANT</span>
+          </div>
+          <div class="boss-bar-outer">
+            <div id="boss-hp-bar" class="boss-bar-fill" style="width: 100%;"></div>
+            <span id="boss-hp-text" class="boss-hp-num">2500 / 2500 HP</span>
+          </div>
+        </div>
+
+        <!-- Cyber Infection HUD (Visible in Infection Mode) -->
+        <div id="infection-hud" class="hud-box hidden">
+          <div class="infection-stat survivors">
+            <span class="inf-label">SURVIVORS</span>
+            <span id="inf-survivors-count" class="inf-val">0</span>
+          </div>
+          <div class="infection-divider"><svg class="cyber-icon biohazard-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8" stroke-dasharray="2 3"/></svg></div>
+          <div class="infection-stat infected">
+            <span class="inf-label">INFECTED</span>
+            <span id="inf-infected-count" class="inf-val">0</span>
+          </div>
+          <div class="infection-timer-wrap">
+            <span id="inf-timer" class="inf-timer-val">90s</span>
+          </div>
+        </div>
+
+        <!-- Battle Royale HUD (Visible in Battle Royale Mode) -->
+        <div id="br-hud" class="hud-box hidden">
+          <div class="infection-stat survivors">
+            <span class="inf-label">MECHS ALIVE</span>
+            <span id="br-alive-count" class="inf-val">0 / 0</span>
+          </div>
+          <div class="infection-divider">⚡</div>
+          <div class="infection-stat">
+            <span class="inf-label">STORM PHASE</span>
+            <span id="br-phase-label" class="inf-val" style="color: #ffaa00;">PHASE 1</span>
+          </div>
+          <div class="infection-timer-wrap">
+            <span id="br-timer" class="inf-timer-val">35s</span>
+          </div>
+        </div>
+
+        <!-- Announcement Banners -->
+        <div id="announcement-banner" class="hidden">
+          <div id="banner-text">RAMPAGE!!</div>
+        </div>
+      </div>
+
+      <!-- Top Right: Controls Dock + Leaderboard + Killfeed (Stacked Cleanly) -->
+      <div id="stats-panel">
+        <div id="top-controls">
+          <button id="btn-fullscreen" class="control-btn" title="Fullscreen"><svg class="cyber-icon" viewBox="0 0 24 24"><path d="M8 3H4a1 1 0 0 0-1 1v4"/><path d="M16 3h4a1 1 0 0 1 1 1v4"/><path d="M8 21H4a1 1 0 0 1-1-1v-4"/><path d="M16 21h4a1 1 0 0 0 1-1v-4"/></svg> FULL</button>
+          <button id="btn-host-panel" class="control-btn host-btn hidden" title="Host Controls [H]"><svg class="cyber-icon" viewBox="0 0 24 24"><path d="M2 19h20L19 7l-5 6-2-9-2 9-5-6-3 12z"/><line x1="2" y1="21" x2="22" y2="21"/></svg> HOST</button>
+        </div>
+
+        <div id="leaderboard" class="hud-box">
+          <div class="box-title"><svg class="cyber-icon" viewBox="0 0 24 24" style="color:var(--yellow);"><path d="M6 9H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3"/><path d="M18 9h3a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-3"/><path d="M6 3h12v7a6 6 0 0 1-12 0V3z"/><line x1="12" y1="16" x2="12" y2="20"/><line x1="7" y1="20" x2="17" y2="20"/></svg> LEADERBOARD</div>
+          <div id="leaderboard-list"></div>
+        </div>
+
+        <div id="killfeed"></div>
+      </div>
+
+      <!-- Bottom Right Minimap -->
+      <div id="minimap-container" class="hud-box">
+        <canvas id="minimap-canvas" width="160" height="160"></canvas>
+        <div class="minimap-label">RADAR SCANNER</div>
+      </div>
+
+      <!-- Mobile Touch Controls -->
+      <div id="mobile-controls" class="mobile-only">
+        <div id="touch-joy-move" class="touch-zone">
+          <div class="joy-base"><div class="joy-thumb"></div></div>
+        </div>
+
+        <div id="touch-joy-aim" class="touch-zone">
+          <div class="joy-base"><div class="joy-thumb"></div></div>
+        </div>
+
+        <button id="btn-touch-dash" class="touch-action-btn">DASH</button>
+        <button id="btn-touch-parry" class="touch-action-btn">PARRY</button>
+        <button id="btn-touch-super" class="touch-action-btn super-btn">SUPER</button>
+        <button id="btn-touch-emoji" class="touch-action-btn">COMMS</button>
+        <button id="btn-touch-host" class="touch-action-btn host-touch-btn hidden">HOST</button>
+      </div>
+
+      <!-- Tactical Comms Wheel Modal -->
+      <div id="emoji-modal" class="hidden">
+        <div style="font-family: var(--font-display); font-size: 10px; font-weight: 800; color: var(--cyan); text-align: center; margin-bottom: 8px; letter-spacing: 1px;">TACTICAL COMMS // [E]</div>
+        <div class="emoji-grid">
+          <button class="emoji-btn" data-emoji="crown" title="Apex Champion">
+            <svg class="cyber-icon" viewBox="0 0 24 24" style="color:var(--yellow);"><path d="M2 19h20L19 7l-5 6-2-9-2 9-5-6-3 12z"/><line x1="2" y1="21" x2="22" y2="21"/></svg>
+            <span class="icon-label">APEX</span>
+          </button>
+          <button class="emoji-btn" data-emoji="skull" title="Target Eliminated">
+            <svg class="cyber-icon" viewBox="0 0 24 24" style="color:var(--pink);"><path d="M12 2C6.5 2 4 6 4 11c0 3.5 2 6 3 7v3h10v-3c1-1 3-3.5 3-7 0-5-2.5-9-8-9z"/><rect x="7" y="9" width="3.5" height="3" rx="1"/><rect x="13.5" y="9" width="3.5" height="3" rx="1"/><line x1="9" y1="18" x2="9" y2="21"/><line x1="12" y1="18" x2="12" y2="21"/><line x1="15" y1="18" x2="15" y2="21"/></svg>
+            <span class="icon-label">ELIM</span>
+          </button>
+          <button class="emoji-btn" data-emoji="flame" title="Overdrive / Berserk">
+            <svg class="cyber-icon" viewBox="0 0 24 24" style="color:#ffaa00;"><path d="M12 2c.5 3.5 3 5.5 5 8 2.5 3.2 2.5 7.5-.2 10.2A8 8 0 0 1 4.5 17c0-4 3.5-6.5 4.5-9 .8 2.5 2 3.5 3 3.5 0-3.5 0-7.5 0-9.5z"/></svg>
+            <span class="icon-label">BURN</span>
+          </button>
+          <button class="emoji-btn" data-emoji="target" title="Target Lock / Focus Fire">
+            <svg class="cyber-icon" viewBox="0 0 24 24" style="color:var(--cyan);"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>
+            <span class="icon-label">LOCK</span>
+          </button>
+          <button class="emoji-btn" data-emoji="lightning" title="EMP Shock / Surge">
+            <svg class="cyber-icon" viewBox="0 0 24 24" style="color:var(--yellow);"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            <span class="icon-label">SURGE</span>
+          </button>
+          <button class="emoji-btn" data-emoji="taunt" title="Cyber Taunt / Glitch Smirk">
+            <svg class="cyber-icon" viewBox="0 0 24 24" style="color:var(--cyan);"><circle cx="12" cy="12" r="10"/><rect x="6" y="8" width="12" height="3" rx="1.5"/><path d="M8 15s1.5 2 4 2 4-2 4-2"/></svg>
+            <span class="icon-label">SMIRK</span>
+          </button>
+          <button class="emoji-btn" data-emoji="rocket" title="Heavy Missile / Nuke">
+            <svg class="cyber-icon" viewBox="0 0 24 24" style="color:var(--pink);"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/></svg>
+            <span class="icon-label">NUKE</span>
+          </button>
+          <button class="emoji-btn" data-emoji="shield" title="Shield Wall / Defend">
+            <svg class="cyber-icon" viewBox="0 0 24 24" style="color:var(--cyan);"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <span class="icon-label">GUARD</span>
+          </button>
+          <button class="emoji-btn text-quick" data-emoji="GG!">GG!</button>
+          <button class="emoji-btn text-quick" data-emoji="NICE SHOT!">NICE SHOT!</button>
+          <button class="emoji-btn text-quick" data-emoji="DEFEND!">DEFEND!</button>
+          <button class="emoji-btn text-quick" data-emoji="CROWN IS MINE!">APEX MINE!</button>
+        </div>
+      </div>
+
+      <!-- Host In-Game Admin Modal -->
+      <div id="host-modal" class="hidden">
+        <div class="modal-card host-admin-card">
+          <div class="host-modal-header">
+            <div class="host-modal-title">👑 HOST MATCH OPERATIONS</div>
+            <button id="btn-close-host" class="close-x">&times;</button>
+          </div>
+
+          <div class="host-admin-body">
+            <div class="admin-group">
+              <label>SWITCH ARENA MAP:</label>
+              <select id="host-select-map" class="cyber-select">
+                <option value="core">Sector 01: The Core</option>
+                <option value="labyrinth">Sector 02: Neon Labyrinth</option>
+                <option value="colosseum">Sector 03: Hyper Ring</option>
+                <option value="pinball">Sector 04: Pinball Citadel</option>
+                <option value="hypergrid">Sector 05: Cyber Metropolis</option>
+                <option value="vortex_abyss">Sector 06: Singularity Core</option>
+                <option value="megacity">Sector 07: Neo-Veridia Mega City (5000x5000 MEGA)</option>
+              </select>
+            </div>
+
+            <div class="admin-group">
+              <label>SWITCH GAME MODE:</label>
+              <select id="host-select-mode" class="cyber-select">
+                <option value="ffa">Free For All (FFA)</option>
+                <option value="teams">Team DM (Red vs Blue)</option>
+                <option value="pve">PvE Boss Raid (Goliath Core)</option>
+                <option value="gungame">Gun Game (8 Tiers)</option>
+                <option value="infection">Cyber Infection (Outbreak)</option>
+                <option value="battleroyale">Battle Royale (Apex Last Standing)</option>
+              </select>
+            </div>
+
+            <div class="admin-group">
+              <label>AI SYNTHETIC BOTS:</label>
+              <div class="bot-stepper">
+                <button id="btn-bot-minus" class="step-btn">-</button>
+                <span id="host-bot-display">0 BOTS</span>
+                <button id="btn-bot-plus" class="step-btn">+</button>
+              </div>
+            </div>
+
+            <div class="admin-group">
+              <label for="host-select-bot-difficulty">BOT DIFFICULTY:</label>
+              <select id="host-select-bot-difficulty" class="cyber-select">
+                <option value="harmless">Harmless (Dummy)</option>
+                <option value="easy">Easy (Casual)</option>
+                <option value="medium" selected>Medium (Standard)</option>
+                <option value="hard">Hard (Veteran)</option>
+                <option value="extreme">Extreme (Lethal)</option>
+              </select>
+            </div>
+
+            <!-- Host Custom Game Mutators Section -->
+            <div class="mutator-section">
+              <div class="mutator-title-row">
+                <span class="mutator-title">⚡ HOST CUSTOM GAME MUTATORS</span>
+                <span style="font-size: 8px; color: var(--yellow); font-family: var(--font-display);">REALTIME</span>
+              </div>
+              <div class="mutator-grid">
+                <div class="mutator-slider-item">
+                  <div class="mutator-slider-row">
+                    <span>GAME SPEED: <b id="val-host-speed">1.0x</b></span>
+                  </div>
+                  <input type="range" id="host-mutator-speed" class="mutator-slider" min="0.5" max="2.0" step="0.1" value="1.0">
+                </div>
+
+                <div class="mutator-toggle-item" id="host-toggle-infiniteDash">
+                  <span>INFINITE DASH</span>
+                  <span class="m-status">OFF</span>
+                </div>
+                <div class="mutator-toggle-item" id="host-toggle-unlimitedSupers">
+                  <span>UNLIMITED SUPERS</span>
+                  <span class="m-status">OFF</span>
+                </div>
+                <div class="mutator-toggle-item" id="host-toggle-vampirism">
+                  <span>VAMPIRISM (+50% HP)</span>
+                  <span class="m-status">OFF</span>
+                </div>
+                <div class="mutator-toggle-item" id="host-toggle-instagib">
+                  <span>INSTAGIB (10x DMG)</span>
+                  <span class="m-status">OFF</span>
+                </div>
+                <div class="mutator-toggle-item" id="host-toggle-bouncingHell">
+                  <span>BOUNCING HELL (+4)</span>
+                  <span class="m-status">OFF</span>
+                </div>
+                <div class="mutator-toggle-item" id="host-toggle-lowFriction">
+                  <span>DRIFT / ICE PHYSICS</span>
+                  <span class="m-status">OFF</span>
+                </div>
+                <div class="mutator-slider-item">
+                  <div class="mutator-slider-row">
+                    <span>WEAPON LOCK:</span>
+                  </div>
+                  <select id="host-select-weaponLock" class="cyber-select" style="width: 100%; margin-top: 4px; padding: 4px 6px; font-size: 10px;">
+                    <option value="">-- UNLOCKED (ANY WEAPON) --</option>
+                    <option value="blaster">Pulse Cannon Only</option>
+                    <option value="scatter">Scattershot Only</option>
+                    <option value="railgun">Neon Railgun Only</option>
+                    <option value="bouncing">Plasma Ricochet Only</option>
+                    <option value="rocket">Micro-Missile (Rocket Jump) Only</option>
+                    <option value="cryo">Cryo Freeze Ray Only</option>
+                    <option value="flame">Flamethrower Only</option>
+                    <option value="seeker">Seeker Swarm Only</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="admin-actions">
+              <button id="btn-host-return-lobby" class="action-btn cyan" style="border-color: var(--yellow); color: var(--yellow);"><svg class="cyber-icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> RETURN TO LOBBY</button>
+              <button id="btn-host-sudden-death" class="action-btn red"><svg class="cyber-icon" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> TRIGGER SUDDEN DEATH</button>
+              <button id="btn-host-mega-crate" class="action-btn gold"><svg class="cyber-icon" viewBox="0 0 24 24"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg> SPAWN MEGA CRATE</button>
+              <button id="btn-host-reset-scores" class="action-btn cyan"><svg class="cyber-icon" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> RESET MATCH SCORES</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Laptop & Keyboard Controls Modal -->
+      <div id="controls-modal" class="hidden">
+        <div class="modal-card host-admin-card controls-card">
+          <div class="host-modal-header">
+            <div class="host-modal-title">⌨️ LAPTOP & TOUCHPAD CONTROLS</div>
+            <button id="btn-close-controls" class="close-x">&times;</button>
+          </div>
+
+          <div class="controls-guide-body">
+            <div class="control-scheme">
+              <div class="scheme-title">⚡ RECOMMENDED FOR LAPTOP TOUCHPADS</div>
+              <div class="tip-row"><span class="key">WASD</span><span class="val">Move Mech</span></div>
+              <div class="tip-row"><span class="key">Touchpad</span><span class="val">Glide finger to Aim crosshair smoothly</span></div>
+              <div class="tip-row"><span class="key">J or Left Click</span><span class="val">Fire Weapon (No trackpad click needed!)</span></div>
+              <div class="tip-row"><span class="key">Space / Shift / K</span><span class="val">Thruster Dash (Or Right-Click / 2-finger tap)</span></div>
+              <div class="tip-row"><span class="key">L or Q / F</span><span class="val">Activate SUPER Ability</span></div>
+            </div>
+
+            <div class="control-scheme">
+              <div class="scheme-title">🕹️ 100% PURE KEYBOARD (NO TOUCHPAD NEEDED)</div>
+              <div class="tip-row"><span class="key">WASD</span><span class="val">Move Mech</span></div>
+              <div class="tip-row"><span class="key">Arrow Keys</span><span class="val">8-Way Turret Aim & Auto-Shoot</span></div>
+              <div class="tip-row"><span class="key">Space / Shift</span><span class="val">Thruster Dash</span></div>
+              <div class="tip-row"><span class="key">Q / F</span><span class="val">Activate SUPER Ability</span></div>
+            </div>
+
+            <div class="control-scheme">
+              <div class="scheme-title">🎯 WEAPONS, DEFENSE & TACTICS</div>
+              <div class="tip-row"><span class="key">C or V</span><span class="val">Deflect / Parry Shield (Reflects enemy shots at 1.35x speed & dmg!)</span></div>
+              <div class="tip-row"><span class="key">Rocket Jump</span><span class="val">Shoot Micro-Missile into nearby wall: 0 self-dmg + massive bounce!</span></div>
+              <div class="tip-row"><span class="key">1 - 8</span><span class="val">Switch Weapons (Pulse, Scatter, Railgun, Rocket...)</span></div>
+              <div class="tip-row"><span class="key">Scroll Wheel</span><span class="val">Cycle next / prev weapon</span></div>
+              <div class="tip-row"><span class="key">E</span><span class="val">Open Holographic Emoji Wheel</span></div>
+              <div class="tip-row"><span class="key">H</span><span class="val">Host Match Operations (Room Host only)</span></div>
+              <div class="tip-row"><span class="key">/spectate</span><span class="val">Dedicated AI Broadcast Camera for big screens / projectors</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cyberpunk Settings Modal -->
+      <div id="settings-modal" class="hidden">
+        <div class="modal-card host-admin-card settings-card">
+          <div class="host-modal-header">
+            <div class="host-modal-title">⚙️ SYSTEM CONFIG & CONTROLS</div>
+            <button id="btn-close-settings" class="close-x">&times;</button>
+          </div>
+
+          <div class="settings-modal-body">
+            <!-- Hardware & Audio Switches -->
+            <div class="settings-section">
+              <div class="settings-section-title">⚡ HARDWARE & AUDIO SWITCHES</div>
+              <div class="settings-toggles-row">
+                <button id="btn-setting-synth" class="setting-toggle-btn active" title="Toggle Synthwave BGM">
+                  <svg class="cyber-icon" viewBox="0 0 24 24"><path d="M2 12h3l2-6 3 12 3-9 2 6 2-3h5"/></svg>
+                  <div class="toggle-text">
+                    <span class="t-label">SYNTH MUSIC</span>
+                    <span id="txt-setting-synth" class="t-state">ON</span>
+                  </div>
+                </button>
+                <button id="btn-setting-sfx" class="setting-toggle-btn active" title="Toggle Sound FX">
+                  <svg class="cyber-icon" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+                  <div class="toggle-text">
+                    <span class="t-label">SOUND FX</span>
+                    <span id="txt-setting-sfx" class="t-state">ON</span>
+                  </div>
+                </button>
+                <button id="btn-setting-crt" class="setting-toggle-btn active" title="Toggle CRT Filter">
+                  <svg class="cyber-icon" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2.5"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                  <div class="toggle-text">
+                    <span class="t-label">CRT SCANLINES</span>
+                    <span id="txt-setting-crt" class="t-state">ON</span>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            <!-- Controls & Keybindings Summary -->
+            <div class="settings-section">
+              <div class="settings-section-title">⌨️ PILOT CONTROLS & KEYBINDINGS</div>
+              <div class="settings-keys-list">
+                <div class="tip-row"><span class="key">WASD</span><span class="val">Move Mech Chassis</span></div>
+                <div class="tip-row"><span class="key">TOUCHPAD / MOUSE</span><span class="val">Aim Crosshair</span></div>
+                <div class="tip-row"><span class="key">LEFT CLICK / J</span><span class="val">Fire Active Weapon</span></div>
+                <div class="tip-row"><span class="key">SPACE / SHIFT / K</span><span class="val">Thruster Dash (or Right-Click)</span></div>
+                <div class="tip-row"><span class="key">C / V</span><span class="val">Deflect / Parry Shield (Reflects Bullets +35% Dmg!)</span></div>
+                <div class="tip-row"><span class="key">Q / F / L</span><span class="val">Activate Class SUPER Ability</span></div>
+                <div class="tip-row"><span class="key">1 - 8 / SCROLL</span><span class="val">Cycle Weapon Arsenal</span></div>
+                <div class="tip-row"><span class="key">ROCKET JUMP</span><span class="val">Shoot rocket into nearby wall for massive safe bounce</span></div>
+                <div class="tip-row"><span class="key">ARROWS</span><span class="val">Twin-Stick Keyboard Aim & Auto-Shoot</span></div>
+                <div class="tip-row"><span class="key">E</span><span class="val">Holographic Quick Comms Wheel</span></div>
+              </div>
+            </div>
+
+            <button id="btn-settings-open-guide" class="btn-primary" style="width: 100%; margin-top: 12px;">📖 OPEN TACTICAL FIELD GUIDE</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Comprehensive Tactical Field Guide Modal -->
+      <div id="guide-modal" class="hidden">
+        <div class="modal-card guide-card">
+          <div class="guide-modal-header">
+            <div class="guide-title-wrap">
+              <div class="guide-title">📖 OVERCLOCK // TACTICAL FIELD GUIDE</div>
+              <div class="guide-subtitle">PILOT PROTOCOLS • COMBAT ARCHIVES • SYSTEM INTEL</div>
+            </div>
+            <button id="btn-close-guide" class="close-x">&times;</button>
+          </div>
+
+          <!-- Tab Bar -->
+          <div class="guide-tabs">
+            <button class="guide-tab-btn active" data-tab="guide-basics">🎮 BASICS</button>
+            <button class="guide-tab-btn" data-tab="guide-modes">🏆 GAME MODES</button>
+            <button class="guide-tab-btn" data-tab="guide-crates">📦 CRATES & DROPS</button>
+            <button class="guide-tab-btn" data-tab="guide-walls">🧱 WALLS & HAZARDS</button>
+            <button class="guide-tab-btn" data-tab="guide-mechs">🤖 MECH CHASSIS</button>
+            <button class="guide-tab-btn" data-tab="guide-weapons">🔫 WEAPON ARSENAL</button>
+          </div>
+
+          <!-- Guide Content Panels -->
+          <div class="guide-content-viewport">
+            <!-- TAB 1: HOW TO PLAY & BASICS -->
+            <div id="guide-basics" class="guide-panel active">
+              <div class="guide-hero-banner">
+                <div class="hero-tag">FIELD MANUAL 01</div>
+                <div class="hero-headline">PILOT SURVIVAL & COMBAT PROTOCOLS</div>
+                <p>OVERCLOCK is a high-octane 2D top-down cyberpunk mech shooter designed for instant LAN multiplayer and intense tactical combat.</p>
+              </div>
+
+              <div class="guide-grid-2">
+                <div class="guide-card-box">
+                  <div class="box-head">🎯 CORE COMBAT LOOP</div>
+                  <p><b>Move & Aim:</b> Steer your mech with <span class="badge-key">WASD</span> and trackpad/mouse crosshair. Firing can be done via <span class="badge-key">Left Click</span> or keyboard <span class="badge-key">J</span>.</p>
+                  <p><b>Twin Shields & Hull:</b> Kinetic shields absorb damage first. When shields shatter, damage hits your armor hull. Shields begin recharging automatically after 3 seconds of taking no damage.</p>
+                  <p><b>Thruster Dash:</b> Tap <span class="badge-key">Space</span>, <span class="badge-key">Shift</span>, or <span class="badge-key">K</span> for an invincible burst of speed to slip out of explosive radius or pierce through enemy fire.</p>
+                </div>
+
+                <div class="guide-card-box">
+                  <div class="box-head">🛡️ ADVANCED COMBAT TACTICS</div>
+                  <p><b>Deflect / Parry Shield (<span class="badge-key">C / V</span>):</b> Raise a 0.38s kinetic deflection field. Any projectile hitting your shield during this window is reflected back at the attacker with <b>+35% speed and damage</b>!</p>
+                  <p><b>Safe Rocket Jump:</b> Fire micro-missiles directly into nearby walls or feet. Explosive weapons deal <b>0 self-damage</b> to pilots, but provide massive blast propulsion to escape corners!</p>
+                  <p><b>Super Meter (100%):</b> Scoring hits and taking damage fills your quantum core. Press <span class="badge-key">Q / F / L</span> when fully charged to unleash your chassis signature ultimate!</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB 2: ALL GAME MODES -->
+            <div id="guide-modes" class="guide-panel">
+              <div class="guide-cards-col">
+                <div class="guide-item-card">
+                  <div class="item-badge cyan">DEATHMATCH</div>
+                  <div class="item-title">💀 FREE FOR ALL (SOLO ARENA)</div>
+                  <p>Every pilot fights for themselves in an unrestricted battleground. Score eliminations, grab supply crates, and reach 20 frags (or hold highest kills when the clock expires) to secure MVP victory.</p>
+                </div>
+
+                <div class="guide-item-card">
+                  <div class="item-badge blue">TEAM PLAY</div>
+                  <div class="item-title">⚔️ TEAM DEATHMATCH (BLUE VS RED)</div>
+                  <p>Pilots are divided into Blue and Red factions. Coordinate flanks, defend power weapon spawn zones, and combine super abilities to outscore the opposing squad.</p>
+                </div>
+
+                <div class="guide-item-card">
+                  <div class="item-badge green">OBJECTIVE</div>
+                  <div class="item-title">📡 DOMINATION (SECTOR CONTROL)</div>
+                  <p>Three holographic capture zones (Alpha, Bravo, Charlie) are active. Stand in uncontested zones to claim them. Each captured zone generates continuous score for your team.</p>
+                </div>
+
+                <div class="guide-item-card">
+                  <div class="item-badge yellow">KING OF THE HILL</div>
+                  <div class="item-title">👑 CROWN CONTROL (GOLDEN CARRIER)</div>
+                  <p>A radiant cyber-crown spawns in the arena center. Holding the crown grants rapid score generation and shield overcharge, but paints a giant target on your radar for all pilots!</p>
+                </div>
+
+                <div class="guide-item-card">
+                  <div class="item-badge purple">SURVIVAL HORROR</div>
+                  <div class="item-title">☣️ CYBER INFECTION (OUTBREAK)</div>
+                  <p>One pilot awakens as Patient Zero with toxic corruption and supercharged speed. Striking uninfected mechs assimilates them into the hive. Survivors must hold out until the countdown clock runs out!</p>
+                </div>
+
+                <div class="guide-item-card">
+                  <div class="item-badge orange">BATTLE ROYALE</div>
+                  <div class="item-title">🌐 BATTLE ROYALE (MEGA CITY)</div>
+                  <p>Massive 5000x5000 arena with shrinking deadly electromagnetic storm. Scavenge high-tier supply drops, survive perimeter hazards, and eliminate all rivals to be the Last Mech Standing!</p>
+                </div>
+
+                <div class="guide-item-card">
+                  <div class="item-badge red">CO-OP RAID</div>
+                  <div class="item-title">👾 BOSS RAID (GOLIATH CYBER-TITAN)</div>
+                  <p>Pilots unite in cooperative combat against a multi-phase colossal AI Mech Boss armed with laser sweeps, tracking orbital missiles, and defensive forcefields.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB 3: ALL CRATES & PICKUPS -->
+            <div id="guide-crates" class="guide-panel">
+              <div class="guide-grid-2">
+                <div class="guide-item-card">
+                  <div class="item-badge green">VITALITY</div>
+                  <div class="item-title">💚 HEALTH NANO-REPAIR CRATE</div>
+                  <p>Contains self-assembling repair nanites. Instantly restores <b>50 Hull HP</b> on contact to pull your mech back from critical breach.</p>
+                </div>
+
+                <div class="guide-item-card">
+                  <div class="item-badge cyan">DEFENSE</div>
+                  <div class="item-title">🛡️ OVERSHIELD BOOSTER</div>
+                  <p>Overcharges your kinetic shield generator to 100% capacity and provides temporary kinetic damage dampening against energy strikes.</p>
+                </div>
+
+                <div class="guide-item-card">
+                  <div class="item-badge yellow">ORDNANCE</div>
+                  <div class="item-title">⚡ AMMO RESUPPLY CRATE</div>
+                  <p>Refills all active weapon batteries and missile pods back to full capacity. Essential for heavy railgun and rocket combat.</p>
+                </div>
+
+                <div class="guide-item-card">
+                  <div class="item-badge purple">DAMAGE FRENZY</div>
+                  <div class="item-title">🔥 OVERCHARGE CRATE</div>
+                  <p>Overclocks your mech core with <b>4X Quad Damage</b> and blazing fire rate for 10 seconds. Unleashes neon purple muzzle flash.</p>
+                </div>
+
+                <div class="guide-item-card">
+                  <div class="item-badge green">VELOCITY</div>
+                  <div class="item-title">💨 SPEED TURBINE BOOSTER</div>
+                  <p>Overdrives mech thrusters with <b>+45% movement speed</b> and instant dash recharge for 12 seconds of unrivaled agility.</p>
+                </div>
+
+                <div class="guide-item-card">
+                  <div class="item-badge yellow">ROYALTY</div>
+                  <div class="item-title">👑 CROWN POWER ORB</div>
+                  <p>Spawns in Crown Control mode. Grants passive point generation, a radiant golden aura, and passive shield regeneration while held.</p>
+                </div>
+
+                <div class="guide-item-card" style="grid-column: span 2;">
+                  <div class="item-badge red">ORBITAL DROP</div>
+                  <div class="item-title">📦 AIRDROP SUPPLY POD (BATTLE ROYALE)</div>
+                  <p>High-tier gold supply pods dropped from orbit in large maps. Contains rare power weapons, max repair nanites, and complete ammunition packs.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB 4: ALL WALLS & HAZARDS -->
+            <div id="guide-walls" class="guide-panel">
+              <div class="guide-cards-col">
+                <div class="guide-item-card">
+                  <div class="item-badge cyan">COVER</div>
+                  <div class="item-title">⬛ SOLID HARDENED STEEL WALL</div>
+                  <p>Indestructible titanium alloy architecture. Blocks all standard weapon fire and provides permanent combat cover for reloading and shield recovery.</p>
+                </div>
+
+                <div class="guide-item-card">
+                  <div class="item-badge orange">DESTRUCTIBLE</div>
+                  <div class="item-title">🟧 ORANGE DESTRUCTIBLE WALL</div>
+                  <p>Reinforced concrete barrier with structural degradation stages. Shows progressive visual cracks and scorches as it absorbs hits. Heavy fire collapses the wall into scattered rubble chunks.</p>
+                </div>
+
+                <div class="guide-item-card">
+                  <div class="item-badge yellow">ELASTIC PINBALL</div>
+                  <div class="item-title">🟨 YELLOW BOUNCY WALL</div>
+                  <p>High-elasticity kinetic bumper! Stepping or dashing into yellow walls launches mechs away at supersonic speeds (<b>920+ px/s</b>). Non-explosive projectiles bounce off with a <b>+35% velocity boost</b>!</p>
+                </div>
+
+                <div class="guide-item-card">
+                  <div class="item-badge red">HIGH EXPLOSIVE</div>
+                  <div class="item-title">🛢️ VOLATILE FUEL BARRELS</div>
+                  <p>Pressurized fuel drums scattered throughout the arena. Shooting a barrel triggers a massive fiery explosion that obliterates nearby destructible walls and ignites adjacent barrels in chain reactions!</p>
+                </div>
+
+                <div class="guide-item-card">
+                  <div class="item-badge cyan">TELEPORTATION</div>
+                  <div class="item-title">🌀 QUANTUM WARP PORTALS</div>
+                  <p>Step into the swirling energy vortex to charge a deliberate 0.38s sub-space warp. Instantly emerges at the target portal coordinates smoothly without dragging or clipping through walls.</p>
+                </div>
+
+                <div class="guide-item-card">
+                  <div class="item-badge green">SUPERSONIC THRUST</div>
+                  <div class="item-title">⏩ GREEN BOOSTER RUNWAYS</div>
+                  <p>Directional acceleration strips with animated neon chevrons. Touching a pad rockets mechs forward at <b>1250+ px/s</b> and accelerates passing bullets by +30% speed and damage!</p>
+                </div>
+
+                <div class="guide-item-card">
+                  <div class="item-badge red">SECURITY GRID</div>
+                  <div class="item-title">🚨 ENVIRONMENTAL DEFENSE LASERS</div>
+                  <p>Oscillating red security laser emitters that sweep corridors on fixed timers. Crossing an active beam burns shields and hull instantly—wait for the cycle to pass before running through.</p>
+                </div>
+
+                <div class="guide-item-card">
+                  <div class="item-badge purple">STORM GRID</div>
+                  <div class="item-title">⚡ TOXIC STORM RADIATION (BATTLE ROYALE)</div>
+                  <p>In Battle Royale mode, the perimeter electric storm grid periodically contracts towards the safe zone. Remaining outside the safe ring causes continuous hull corrosion.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB 5: ALL MECH CHASSIS -->
+            <div id="guide-mechs" class="guide-panel">
+              <div class="guide-grid-2">
+                <div class="guide-item-card">
+                  <div class="item-badge cyan">SCOUT CLASS</div>
+                  <div class="item-title">⚡ SPECTRE</div>
+                  <p><b>Role:</b> Ultra-high agility flanker and reconnaissance specialist with rapid thruster recovery.</p>
+                  <div class="mech-stat-tags">
+                    <span>SPEED: 95</span><span>HULL: 85</span><span>SHIELD: 45</span><span>DASH: 1.9s</span>
+                  </div>
+                  <p><b>SUPER — Quantum Cloak:</b> Activates complete visual stealth and a +40% thruster speed boost for 5.0 seconds. Cloaks you entirely from enemy radar and auto-aim until weapons are discharged.</p>
+                </div>
+
+                <div class="guide-item-card">
+                  <div class="item-badge red">JUGGERNAUT CLASS</div>
+                  <div class="item-title">🛡️ TITAN</div>
+                  <p><b>Role:</b> Heavy fortified quad-track siege fortress designed to anchor front-line choke points and crush enemy ranks.</p>
+                  <div class="mech-stat-tags">
+                    <span>SPEED: 45</span><span>HULL: 135</span><span>SHIELD: 80</span><span>DASH: 3.2s</span>
+                  </div>
+                  <p><b>SUPER — Seismic Stomp:</b> Slams the ground with colossal kinetic force, creating a 280px shockwave dealing 90 explosive damage (150 to Bosses) and EMP-disabling enemy weapons for 2.5 seconds.</p>
+                </div>
+
+                <div class="guide-item-card">
+                  <div class="item-badge yellow">STRIKER CLASS</div>
+                  <div class="item-title">🔥 VIPER</div>
+                  <p><b>Role:</b> High-frequency twin-barrel assault chassis with built-in 22% faster weapon reload cycles for relentless combat pressure.</p>
+                  <div class="mech-stat-tags">
+                    <span>SPEED: 80</span><span>HULL: 95</span><span>SHIELD: 50</span><span>DASH: 2.3s</span>
+                  </div>
+                  <p><b>SUPER — Overclocked Berserk:</b> Overcharges internal power reactors for 6.0 seconds, multiplying weapon firing rate, eliminating recoil, and delivering unmatched sustained burst DPS.</p>
+                </div>
+
+                <div class="guide-item-card">
+                  <div class="item-badge blue">TECH SPECIALIST</div>
+                  <div class="item-title">⚡ VORTEX</div>
+                  <p><b>Role:</b> Sleek delta-wing electronic warfare platform designed to scramble opponent systems, strip defensive shields, and control team engagements.</p>
+                  <div class="mech-stat-tags">
+                    <span>SPEED: 78</span><span>HULL: 100</span><span>SHIELD: 50</span><span>DASH: 2.6s</span>
+                  </div>
+                  <p><b>SUPER — EMP Shockwave Nova:</b> Emits a violent 320px electromagnetic blast dealing 35 damage and completely shutting down all enemy weapons and radar for 4.0 seconds.</p>
+                </div>
+
+                <div class="guide-item-card">
+                  <div class="item-badge cyan">TIME WARPER</div>
+                  <div class="item-title">⏳ CHRONO</div>
+                  <p><b>Role:</b> Quantum temporal manipulator capable of reversing causality loops and resetting unfavorable combat encounters.</p>
+                  <div class="mech-stat-tags">
+                    <span>SPEED: 82</span><span>HULL: 90</span><span>SHIELD: 45</span><span>DASH: 2.2s</span>
+                  </div>
+                  <p><b>SUPER — Temporal Recall:</b> Instantly rewinds your mech's arena coordinates, hull health, and shields back to your exact state 3.5 seconds ago, erasing ambushes and fatal damage.</p>
+                </div>
+
+                <div class="guide-item-card">
+                  <div class="item-badge green">BASTION DEFENDER</div>
+                  <div class="item-title">🌐 AEGIS</div>
+                  <p><b>Role:</b> Supreme tactical area defender engineered to project heavy kinetic fortifications and secure sectors.</p>
+                  <div class="mech-stat-tags">
+                    <span>SPEED: 40</span><span>HULL: 140</span><span>SHIELD: 90</span><span>DASH: 3.4s</span>
+                  </div>
+                  <p><b>SUPER — Fortified Hex-Dome:</b> Deploys a stationary 360° hexagonal dome shield (450 HP) lasting 8.0 seconds that blocks all incoming enemy projectiles while allowing friendly fire to pass through safely.</p>
+                </div>
+
+                <div class="guide-item-card">
+                  <div class="item-badge purple">INFILTRATOR CLASS</div>
+                  <div class="item-title">🌌 PHANTOM</div>
+                  <p><b>Role:</b> Experimental dimension-shifting skirmisher that slips between physical reality membranes to execute unexpected flank attacks.</p>
+                  <div class="mech-stat-tags">
+                    <span>SPEED: 98</span><span>HULL: 80</span><span>SHIELD: 40</span><span>DASH: 1.8s</span>
+                  </div>
+                  <p><b>SUPER — Void Phase Shift:</b> Dissolves molecular density for 5.0 seconds, enabling the mech to walk directly through solid titanium walls, orange barriers, and hazards while immune to all damage.</p>
+                </div>
+
+                <div class="guide-item-card">
+                  <div class="item-badge orange">SINGULARITY MASTER</div>
+                  <div class="item-title">🌀 GRAVITY</div>
+                  <p><b>Role:</b> Gravitational physics manipulator capable of dragging groups of enemy mechs into devastating kill zones.</p>
+                  <div class="mech-stat-tags">
+                    <span>SPEED: 72</span><span>HULL: 110</span><span>SHIELD: 60</span><span>DASH: 2.8s</span>
+                  </div>
+                  <p><b>SUPER — Black Hole Singularity:</b> Fires a micro black hole vortex 260px ahead for 4.5 seconds with immense pull strength (420 force), dragging in all nearby mechs and projectiles while crushing enemies for 90 damage.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB 6: ALL WEAPONS -->
+            <div id="guide-weapons" class="guide-panel">
+              <div class="guide-cards-col">
+                <div class="guide-item-card">
+                  <div class="item-badge cyan">PRIMARY [1]</div>
+                  <div class="item-title">🔹 PULSE CANNON</div>
+                  <p>The standard issue balanced plasma assault cannon. Delivers rapid fire rate, pinpoint accuracy, and consistent kinetic damage (24 dmg) across all ranges.</p>
+                </div>
+
+                <div class="guide-item-card">
+                  <div class="item-badge red">BURST [2]</div>
+                  <div class="item-title">💥 SCATTERSHOT</div>
+                  <p>5-pellet close-quarters heavy plasma shotgun. Delivers devastating point-blank burst damage (15 dmg/pellet) that shreds through shields and finishes off wounded targets.</p>
+                </div>
+
+                <div class="guide-item-card">
+                  <div class="item-badge green">PIERCING [3]</div>
+                  <div class="item-title">⚡ NEON RAILGUN</div>
+                  <p>Extreme-velocity (2300 px/s) magnetic accelerator cannon. Fires a heavy piercing beam (80 dmg) that passes through multiple mechs in a single shot.</p>
+                </div>
+
+                <div class="guide-item-card">
+                  <div class="item-badge yellow">RICOCHET [4]</div>
+                  <div class="item-title">🟡 PLASMA RICOCHET</div>
+                  <p>High-energy ricochet ordnance that bounces off walls up to 4 times. Perfect for banking shots around corners and flushing out entrenched defenders (30 dmg).</p>
+                </div>
+
+                <div class="guide-item-card">
+                  <div class="item-badge orange">EXPLOSIVE [5]</div>
+                  <div class="item-title">🚀 MICRO-MISSILE (ROCKET JUMP)</div>
+                  <p>Heavy explosive missile with 125px blast radius (85 dmg). Pilots take 0 self-damage, making it ideal for supersonic rocket jumping, clearing rooms, and igniting fuel barrels!</p>
+                </div>
+
+                <div class="guide-item-card">
+                  <div class="item-badge blue">CRYOGENIC [6]</div>
+                  <div class="item-title">❄️ CRYO FREEZE RAY</div>
+                  <p>Continuous cryogenic beam (1200 px/s) with a 45% slowing freeze effect. Decelerates enemy thrusters and dashes, leaving targets helpless to follow-up fire.</p>
+                </div>
+
+                <div class="guide-item-card">
+                  <div class="item-badge red">INCENDIARY [7]</div>
+                  <div class="item-title">🔥 PLASMA FLAMETHROWER</div>
+                  <p>Continuous short-range napalm spray (65ms tick rate) with a wide cone. Melts enemy hulls in close-quarters skirmishes and penetrates group formations.</p>
+                </div>
+
+                <div class="guide-item-card">
+                  <div class="item-badge purple">HOMING [8]</div>
+                  <div class="item-title">🎯 SEEKER SWARM</div>
+                  <p>Smart micro-torpedoes equipped with predictive targeting thrusters. Projectiles actively curve and track moving opponents across obstacles (34 dmg).</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Death Banner & Respawn Countdown Overlay -->
+      <div id="respawn-modal" class="hidden">
+        <div class="respawn-banner">
+          <div class="respawn-title"><span class="skull-pulse">💀</span> PILOT TERMINATED // RECONSTRUCTING NEURAL LINK</div>
+          <div class="respawn-timer-box">RESPAWNING IN <span id="respawn-countdown">10</span>s</div>
+          <div class="respawn-hint">USE [A / D] OR ARROW KEYS TO CYCLE SPECTATOR CAM</div>
+        </div>
+      </div>
+
+      <!-- End of Round Victory Podium Modal -->
+      <div id="podium-modal" class="hidden">
+        <div class="modal-card podium-card">
+          <div class="podium-header">
+            <div class="glitch-title-sm" data-text="MATCH CONCLUDED">MATCH CONCLUDED</div>
+            <div id="podium-subtitle" class="podium-subtitle">VICTORY CEREMONY // MVP AWARDS</div>
+          </div>
+          <div id="podium-stage" class="podium-stage">
+            <!-- 2nd Place -->
+            <div class="podium-pillar rank-2">
+              <div class="podium-avatar" id="podium-avatar-2">🥈</div>
+              <div class="podium-name" id="podium-name-2">--</div>
+              <div class="podium-score" id="podium-score-2">-- PTS</div>
+              <div class="podium-block">2ND</div>
+            </div>
+            <!-- 1st Place -->
+            <div class="podium-pillar rank-1">
+              <div class="podium-crown">👑</div>
+              <div class="podium-avatar" id="podium-avatar-1">🥇</div>
+              <div class="podium-name" id="podium-name-1">--</div>
+              <div class="podium-score" id="podium-score-1">-- PTS</div>
+              <div class="podium-block">CHAMPION</div>
+            </div>
+            <!-- 3rd Place -->
+            <div class="podium-pillar rank-3">
+              <div class="podium-avatar" id="podium-avatar-3">🥉</div>
+              <div class="podium-name" id="podium-name-3">--</div>
+              <div class="podium-score" id="podium-score-3">-- PTS</div>
+              <div class="podium-block">3RD</div>
+            </div>
+          </div>
+          <div id="podium-mvp" class="podium-mvp-box"></div>
+          <div id="podium-leaderboard" class="podium-leaderboard-box"></div>
+          <button id="btn-close-podium" class="btn-primary" style="margin-top: 16px; width: 100%;">RETURN TO LOBBY ◀◀</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pre-Game Cyberpunk Lobby Modal -->
+    <div id="lobby-modal">
+      <div class="lobby-card">
+        <div class="system-status-bar">
+          <div class="status-item"><span class="status-indicator live"></span>NET: <b id="status-net">ONLINE</b></div>
+          <div class="status-item">SERVER: <b id="status-ip">172.31.11.189:3000</b></div>
+          <div class="status-item">ENCRYPTION: <b>QUANTUM-256</b></div>
+          <div class="lobby-quick-actions">
+            <button id="btn-lobby-settings" class="lobby-util-btn" title="Settings: Keys, Synth, SFX, CRT"><svg class="cyber-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> SETTINGS</button>
+            <button id="btn-lobby-guide" class="lobby-util-btn guide-glow" title="Tactical Field Guide (Modes, Crates, Walls, Mechs, Weapons)"><svg class="cyber-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="9" y1="7" x2="15" y2="7"/><line x1="9" y1="11" x2="13" y2="11"/></svg> FIELD GUIDE</button>
+          </div>
+        </div>
+
+        <div class="lobby-header">
+          <div class="glitch-title" data-text="OVERCLOCK">OVERCLOCK</div>
+          <div class="subtitle">TACTICAL MULTIPLAYER LAN ARENA // V3.0</div>
+        </div>
+
+        <div class="lobby-columns">
+          <!-- Column 1: Hangar & Mech Blueprint -->
+          <div class="lobby-section hangar-section">
+            <div class="section-title-tag">01 // MECH HANGAR</div>
+            
+            <div class="hangar-viewport">
+              <canvas id="hangar-canvas" width="220" height="180"></canvas>
+              <div class="hangar-grid-lines"></div>
+              <div class="hangar-badge" id="hangar-class-title">SPECTRE [SCOUT]</div>
+            </div>
+
+            <!-- Dynamic Stat Gauges -->
+            <div class="blueprint-stats">
+              <div class="stat-gauge-row">
+                <span class="g-name">SPEED</span>
+                <div class="g-bar-outer"><div id="stat-speed-bar" class="g-bar-fill" style="width: 90%;"></div></div>
+              </div>
+              <div class="stat-gauge-row">
+                <span class="g-name">ARMOR</span>
+                <div class="g-bar-outer"><div id="stat-armor-bar" class="g-bar-fill" style="width: 45%;"></div></div>
+              </div>
+              <div class="stat-gauge-row">
+                <span class="g-name">FIRE RATE</span>
+                <div class="g-bar-outer"><div id="stat-rate-bar" class="g-bar-fill" style="width: 65%;"></div></div>
+              </div>
+              <div class="stat-gauge-row">
+                <span class="g-name">SUPER</span>
+                <span id="stat-super-badge" class="super-type-badge">STEALTH CLOAK</span>
+              </div>
+            </div>
+
+            <label class="section-heading">SELECT CHASSIS</label>
+            <div id="mech-picker" class="class-options">
+              <button class="class-choice active" data-class="spectre">
+                <div class="c-title">SPECTRE</div>
+                <div class="c-stats">Agile Scout</div>
+                <div class="mech-tooltip-card">
+                  <div class="tooltip-header">
+                    <span class="tooltip-title">SPECTRE</span>
+                    <span class="tooltip-role">AGILITY SCOUT</span>
+                  </div>
+                  <p class="tooltip-desc">High-velocity chassis built from carbon-graphene composites. Exceptional mobility for rapid flank attacks.</p>
+                  <div class="tooltip-super-box">
+                    <div class="tooltip-super-label">⚡ SUPER: STEALTH CLOAK</div>
+                    <div class="tooltip-super-desc">Turn 100% invisible to enemies and gain +40% thruster speed boost for 4.5 seconds.</div>
+                  </div>
+                </div>
+              </button>
+
+              <button class="class-choice" data-class="titan">
+                <div class="c-title">TITAN</div>
+                <div class="c-stats">Heavy Juggernaut</div>
+                <div class="mech-tooltip-card">
+                  <div class="tooltip-header">
+                    <span class="tooltip-title">TITAN</span>
+                    <span class="tooltip-role">HEAVY JUGGERNAUT</span>
+                  </div>
+                  <p class="tooltip-desc">Reinforced siege fortress chassis capable of withstanding heavy focus fire and anchoring key positions.</p>
+                  <div class="tooltip-super-box">
+                    <div class="tooltip-super-label">🛡️ SUPER: FORTRESS SHIELD</div>
+                    <div class="tooltip-super-desc">Project a 360° impenetrable barrier absorbing up to 120 damage and deflecting enemy fire.</div>
+                  </div>
+                </div>
+              </button>
+
+              <button class="class-choice" data-class="viper">
+                <div class="c-title">VIPER</div>
+                <div class="c-stats">Rapid Striker</div>
+                <div class="mech-tooltip-card">
+                  <div class="tooltip-header">
+                    <span class="tooltip-title">VIPER</span>
+                    <span class="tooltip-role">RAPID STRIKER</span>
+                  </div>
+                  <p class="tooltip-desc">High-frequency assassin frame engineered for sudden ambushes and devastating burst damage.</p>
+                  <div class="tooltip-super-box">
+                    <div class="tooltip-super-label">💥 SUPER: OVERDRIVE BURST</div>
+                    <div class="tooltip-super-desc">Supercharges your reactor, giving 2.2x weapon firing rate and zero recoil for 4.0 seconds.</div>
+                  </div>
+                </div>
+              </button>
+
+              <button class="class-choice" data-class="vortex">
+                <div class="c-title">VORTEX</div>
+                <div class="c-stats">EMP Specialist</div>
+                <div class="mech-tooltip-card">
+                  <div class="tooltip-header">
+                    <span class="tooltip-title">VORTEX</span>
+                    <span class="tooltip-role">EMP SPECIALIST</span>
+                  </div>
+                  <p class="tooltip-desc">Tactical electronic warfare platform designed to disrupt opponent electronics and strip defensive shields.</p>
+                  <div class="tooltip-super-box">
+                    <div class="tooltip-super-label">⚡ SUPER: EMP NOVA</div>
+                    <div class="tooltip-super-desc">Unleash an expanding 220px electromagnetic wave that completely scrambles weapons & drains shields.</div>
+                  </div>
+                </div>
+              </button>
+
+              <button class="class-choice" data-class="chrono">
+                <div class="c-title">CHRONO</div>
+                <div class="c-stats">Time Warper</div>
+                <div class="mech-tooltip-card">
+                  <div class="tooltip-header">
+                    <span class="tooltip-title">CHRONO</span>
+                    <span class="tooltip-role">TIME WARPER</span>
+                  </div>
+                  <p class="tooltip-desc">Quantum reality manipulator capable of reversing personal causality loops to escape fatal ambushes.</p>
+                  <div class="tooltip-super-box">
+                    <div class="tooltip-super-label">⏳ SUPER: TIME RECALL</div>
+                    <div class="tooltip-super-desc">Rewinds your mech's coordinates, HP, and shields to exactly where you were 3.5 seconds ago.</div>
+                  </div>
+                </div>
+              </button>
+
+              <button class="class-choice" data-class="aegis">
+                <div class="c-title">AEGIS</div>
+                <div class="c-stats">Bastion Defender</div>
+                <div class="mech-tooltip-card">
+                  <div class="tooltip-header">
+                    <span class="tooltip-title">AEGIS</span>
+                    <span class="tooltip-role">BASTION DEFENDER</span>
+                  </div>
+                  <p class="tooltip-desc">Tactical area defense mech engineered to project heavy fortifications and hold key combat sectors.</p>
+                  <div class="tooltip-super-box">
+                    <div class="tooltip-super-label">🌐 SUPER: HEX-DOME</div>
+                    <div class="tooltip-super-desc">Deploys a stationary 360° hexagonal dome shield (350 HP) for 6.0s that blocks all enemy projectiles.</div>
+                  </div>
+                </div>
+              </button>
+
+              <button class="class-choice" data-class="phantom">
+                <div class="c-title">PHANTOM</div>
+                <div class="c-stats">Void Infiltrator</div>
+                <div class="mech-tooltip-card">
+                  <div class="tooltip-header">
+                    <span class="tooltip-title">PHANTOM</span>
+                    <span class="tooltip-role">VOID INFILTRATOR</span>
+                  </div>
+                  <p class="tooltip-desc">Experimental dimension-phase infiltrator that slips between physical reality membranes.</p>
+                  <div class="tooltip-super-box">
+                    <div class="tooltip-super-label">🌌 SUPER: VOID PHASE</div>
+                    <div class="tooltip-super-desc">Phase into the void realm for 3.0s: walk through solid arena walls while immune to all damage.</div>
+                  </div>
+                </div>
+              </button>
+
+              <button class="class-choice" data-class="gravity">
+                <div class="c-title">GRAVITY</div>
+                <div class="c-stats">Singularity Master</div>
+                <div class="mech-tooltip-card">
+                  <div class="tooltip-header">
+                    <span class="tooltip-title">GRAVITY</span>
+                    <span class="tooltip-role">SINGULARITY</span>
+                  </div>
+                  <p class="tooltip-desc">Graviton accelerator platform capable of creating micro black-hole vortex anomalies.</p>
+                  <div class="tooltip-super-box">
+                    <div class="tooltip-super-label">🌀 SUPER: BLACK HOLE</div>
+                    <div class="tooltip-super-desc">Fires a singularity vortex that violently pulls all nearby rival mechs and projectiles into its center.</div>
+                  </div>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <!-- Column 2: Pilot Loadout & Weapons -->
+          <div class="lobby-section loadout-section">
+            <div class="section-title-tag">02 // PILOT LOADOUT</div>
+
+            <div class="input-group">
+              <label class="section-heading" for="input-nickname">PILOT CALLSIGN</label>
+              <input type="text" id="input-nickname" placeholder="Enter name..." maxlength="14" autofocus autocomplete="off">
+            </div>
+
+            <div class="input-group">
+              <label class="section-heading" for="select-title">CALLSIGN TITLE</label>
+              <select id="select-title" class="cyber-select">
+                <option value="Cyber Ghost">«Cyber Ghost»</option>
+                <option value="Neon Reaper">«Neon Reaper»</option>
+                <option value="Subnet Menace">«Subnet Menace»</option>
+                <option value="Pixel Warlord">«Pixel Warlord»</option>
+                <option value="Apex Glitch">«Apex Glitch»</option>
+                <option value="Honor Student">«Honor Student»</option>
+              </select>
+            </div>
+
+            <label class="section-heading">NEON HULL GLOW</label>
+            <div id="team-lock-notice" class="team-lock-badge hidden">⚠️ TEAM DM: RED VS BLUE LOCKED</div>
+            <div id="color-picker" class="color-options">
+              <button class="color-swatch active" data-color="#00f7ff" style="--c: #00f7ff;" title="Cyber Cyan"></button>
+              <button class="color-swatch" data-color="#ff0055" style="--c: #ff0055;" title="Neon Pink"></button>
+              <button class="color-swatch" data-color="#00ff66" style="--c: #00ff66;" title="Toxic Lime"></button>
+              <button class="color-swatch" data-color="#ffe600" style="--c: #ffe600;" title="Electric Gold"></button>
+              <button class="color-swatch" data-color="#bf00ff" style="--c: #bf00ff;" title="Plasma Purple"></button>
+              <button class="color-swatch" data-color="#ff5500" style="--c: #ff5500;" title="Solar Flare"></button>
+            </div>
+
+            <label class="section-heading">STARTING WEAPON</label>
+            <div id="weapon-picker" class="weapon-grid">
+              <button class="weapon-choice active" data-weapon="blaster" title="Rapid Plasma Cannon">Pulse Cannon</button>
+              <button class="weapon-choice" data-weapon="scatter" title="5-Pellet Shotgun">Scattershot</button>
+              <button class="weapon-choice" data-weapon="railgun" title="Piercing Sniper Laser">Neon Railgun</button>
+              <button class="weapon-choice" data-weapon="bouncing" title="4-Bounce Plasma">Ricochet</button>
+              <button class="weapon-choice" data-weapon="rocket" title="Area Blast Rocket">Micro-Missile</button>
+              <button class="weapon-choice" data-weapon="cryo" title="Chilling Slow Ray">Cryo Freeze</button>
+              <button class="weapon-choice" data-weapon="flame" title="Incinerating Cone">Flamethrower</button>
+              <button class="weapon-choice" data-weapon="seeker" title="Homing Smart-Darts">Seeker Swarm</button>
+            </div>
+
+            <button id="btn-deploy" class="btn-primary">
+              <span class="btn-deploy-text">DEPLOY INTO ARENA</span>
+              <span class="btn-deploy-arrow">▶▶</span>
+            </button>
+          </div>
+
+          <!-- Column 3: Mission Command & LAN QR -->
+          <div class="lobby-section command-section">
+            <div class="section-title-tag">03 // MISSION COMMAND</div>
+
+            <!-- HOST CONTROLS PANEL (Visible only to Host) -->
+            <div id="lobby-host-panel" class="cyber-settings-box hidden">
+              <div class="panel-badge host">👑 HOST MATCH OPERATIONS</div>
+              <div class="settings-row">
+                <label for="select-map">MAP:</label>
+                <select id="select-map" class="cyber-select">
+                  <option value="core">Sector 01: The Core</option>
+                  <option value="labyrinth">Sector 02: Neon Labyrinth</option>
+                  <option value="colosseum">Sector 03: Hyper Ring</option>
+                  <option value="pinball">Sector 04: Pinball Citadel</option>
+                  <option value="hypergrid">Sector 05: Cyber Metropolis</option>
+                  <option value="vortex_abyss">Sector 06: Singularity Core</option>
+                  <option value="megacity">Sector 07: Neo-Veridia Mega City (5000x5000 MEGA)</option>
+                </select>
+              </div>
+
+              <div class="settings-row">
+                <label for="select-gamemode">MODE:</label>
+                <select id="select-gamemode" class="cyber-select">
+                  <option value="ffa">Free For All (FFA)</option>
+                  <option value="teams">Team DM (Red vs Blue)</option>
+                  <option value="pve">PvE Boss Raid (Goliath Core)</option>
+                  <option value="gungame">Gun Game (8 Tiers)</option>
+                  <option value="infection">Cyber Infection (Outbreak)</option>
+                  <option value="battleroyale">Battle Royale (Apex Last Standing)</option>
+                </select>
+              </div>
+
+              <div class="settings-row">
+                <label>AI BOTS:</label>
+                <div class="bot-stepper">
+                  <button id="btn-lobby-bot-minus" class="step-btn">-</button>
+                  <span id="lobby-bot-display">0 BOTS</span>
+                  <button id="btn-lobby-bot-plus" class="step-btn">+</button>
+                </div>
+              </div>
+
+              <div class="settings-row">
+                <label for="select-bot-difficulty">BOT LEVEL:</label>
+                <select id="select-bot-difficulty" class="cyber-select">
+                  <option value="harmless">Harmless (Dummy)</option>
+                  <option value="easy">Easy (Casual)</option>
+                  <option value="medium" selected>Medium (Standard)</option>
+                  <option value="hard">Hard (Veteran)</option>
+                  <option value="extreme">Extreme (Lethal)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- GUEST READ-ONLY PANEL (Visible to Classmates) -->
+            <div id="lobby-guest-panel" class="cyber-settings-box">
+              <div class="panel-badge guest"><svg class="cyber-icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> CONTROLLED BY HOST</div>
+              <div class="guest-info-row">
+                <span class="g-label">MAP:</span>
+                <span id="guest-map-display" class="g-val">SECTOR 01: THE CORE</span>
+              </div>
+              <div class="guest-info-row">
+                <span class="g-label">MODE:</span>
+                <span id="guest-mode-display" class="g-val">CYBER DEATHMATCH</span>
+              </div>
+              <div class="guest-info-row">
+                <span class="g-label">BOTS:</span>
+                <span id="guest-bots-display" class="g-val">0 BOTS</span>
+              </div>
+              <button id="btn-claim-host" class="claim-host-btn"><svg class="cyber-icon crown-icon" viewBox="0 0 24 24"><path d="M2 19h20L19 7l-5 6-2-9-2 9-5-6-3 12z"/><line x1="2" y1="21" x2="22" y2="21"/></svg> CLAIM HOST PRIVILEGES</button>
+            </div>
+
+            <!-- LAN Join Box with Laser Scanner -->
+            <div class="lan-box">
+              <div class="lan-title">
+                <span class="pulse-dot"></span>
+                <span>CLASSMATES: SCAN TO PLAY</span>
+              </div>
+              <p class="lan-desc">Join same school Wi-Fi and scan or visit:</p>
+              
+              <div class="qr-wrapper">
+                <div class="laser-scanner-line"></div>
+                <div id="qr-loading-placeholder" class="qr-loading-text">GENERATING QR...</div>
+                <img id="lan-qr-img" src="" alt="Scan QR Code to join" style="display: none;" />
+              </div>
+
+              <div class="url-copy-box">
+                <input type="text" id="lan-url-display" readonly value="Loading..." />
+                <button id="btn-copy-url" title="Copy to clipboard">COPY</button>
+              </div>
+
+              <div class="quick-tips">
+                <div class="tip-row"><span class="key">WASD</span><span class="val">Move Mech</span></div>
+                <div class="tip-row"><span class="key">TOUCHPAD / MOUSE</span><span class="val">Aim Crosshair | J or Click to Fire</span></div>
+                <div class="tip-row"><span class="key">SPACE / SHIFT / K</span><span class="val">Thruster Dash (or Right-Click)</span></div>
+                <div class="tip-row"><span class="key">C / V</span><span class="val">Deflect / Parry Shield (Reflects Bullets)</span></div>
+                <div class="tip-row"><span class="key">Q / F / L</span><span class="val">Activate Class SUPER Ability</span></div>
+                <div class="tip-row"><span class="key">ARROWS</span><span class="val">Twin-Stick Keyboard Aim & Shoot</span></div>
+                <div class="tip-row"><span class="key">1 - 8 / SCROLL</span><span class="val">Switch Weapons | H Host Panel</span></div>
+                <div class="tip-row"><span class="key">/spectate</span><span class="val">Director Broadcast for Big Screens</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

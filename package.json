@@ -1,0 +1,19 @@
+{
+  "name": "overclock",
+  "version": "1.0.0",
+  "description": "High-octane cyberpunk multiplayer LAN browser arena game",
+  "main": "server/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server/server.js",
+    "test": "node test/simulate-clients.js"
+  },
+  "keywords": ["multiplayer", "lan", "game", "websocket", "canvas"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.21.2",
+    "qrcode": "^1.5.4",
+    "ws": "^8.18.0"
+  }
+}
